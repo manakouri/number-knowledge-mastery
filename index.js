@@ -3,16 +3,16 @@ import { createRoot } from 'react-dom/client';
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
 import { 
   getFirestore, collection, getDocs, doc, getDoc, 
-  query, orderBy, updateDoc 
+  query, orderBy, updateDoc, setDoc
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDshxktyzOe7ieSaOoZJiZ2HIRZC69afho",
-    authDomain: "maths-knowledge-1480d.firebaseapp.com",
-    projectId: "maths-knowledge-1480d",
-    storageBucket: "maths-knowledge-1480d.firebasestorage.app",
-    messagingSenderId: "768472041798",
-    appId: "1:768472041798:web:2b0e3628f9408a252d3d47",
+  apiKey: "AIzaSyDshxktyzOe7ieSaOoZJiZ2HIRZC69afho",
+  authDomain: "maths-knowledge-1480d.firebaseapp.com",
+  projectId: "maths-knowledge-1480d",
+  storageBucket: "maths-knowledge-1480d.firebasestorage.app",
+  messagingSenderId: "768472041798",
+  appId: "1:768472041798:web:2b0e3628f9408a252d3d47",
 };
 
 const app = initializeApp(firebaseConfig);
@@ -33,50 +33,58 @@ const db = getFirestore(app);
 
     // Adjust these sample documents to match your app schema as needed
     const sampleSessions = [
-       { session_id: 1, strand: "place_value", title: "The 10 Symbols", li: "Recognise 0-9 build all numbers.", atoms: ["PV-1.1"], 
-  conceptual_atoms: [
-      {"atom": "There are only 10 digits in our system: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.", "type": "Fact"},
-      {"atom": "Identify each digit by its name and symbol.", "type": "Categorical"},
-      {"atom": "Recognise that any multi-digit number is built from these 10 symbols.", "type": "Fact"}
-    ]}
+      {
+        session_id: 1,
+        strand: "place_value",
+        title: "The 10 Symbols",
+        li: "Recognise 0-9 build all numbers.",
+        atoms: ["PV-1.1"],
+        conceptual_atoms: [
+          { atom: "There are only 10 digits in our system: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.", type: "Fact" },
+          { atom: "Identify each digit by its name and symbol.", type: "Categorical" },
+          { atom: "Recognise that any multi-digit number is built from these 10 symbols.", type: "Fact" }
+        ]
+      }
     ];
 
-   // corrected sampleAtoms and write loop
-const sampleAtoms = [
-  {
-    atom_id: "PV-1.1",
-    strand: "place_value",
-    title: "The 10 Symbols",
-    description: "Recognizing that 0-9 are the building blocks of all numbers.",
-    misconceptions: ["Confusing digit value with position"],
-    retrieval_pool: [
-      { q: "How many single digits exist in our number system?", a: "10 (0 through 9)" },
-      { q: "What is the largest single-digit symbol?", a: "9" },
-      { q: "True or False: The number 11 is a single digit symbol.", a: "False (it is two symbols)" },
-      { q: "Which digit represents 'none' or 'empty'?", a: "0" },
-      { q: "Can we build any number using only 0, 1, 2, 3, 4, 5, 6, 7, 8, and 9?", a: "Yes" }
-    ]
+    const sampleAtoms = [
+      {
+        atom_id: "PV-1.1",
+        strand: "place_value",
+        title: "The 10 Symbols",
+        description: "Recognizing that 0-9 are the building blocks of all numbers.",
+        misconceptions: ["Confusing digit value with position"],
+        retrieval_pool: [
+          { q: "How many single digits exist in our number system?", a: "10 (0 through 9)" },
+          { q: "What is the largest single-digit symbol?", a: "9" },
+          { q: "True or False: The number 11 is a single digit symbol.", a: "False (it is two symbols)" },
+          { q: "Which digit represents 'none' or 'empty'?", a: "0" },
+          { q: "Can we build any number using only 0, 1, 2, 3, 4, 5, 6, 7, 8, and 9?", a: "Yes" }
+        ]
+      }
+    ];
+
+    const writes = [];
+
+    // Write sessions (use doc IDs that your app expects; here we use session_<id>)
+    for (const s of sampleSessions) {
+      const docRef = doc(db, 'master_sessions', `session_${s.session_id}`);
+      writes.push(setDoc(docRef, s));
+    }
+
+    // Write atoms collection using atom_id or id as the document ID and write the full object
+    for (const a of sampleAtoms) {
+      const atomDocId = a.atom_id || a.id;
+      const atomRef = doc(db, 'atoms', atomDocId);
+      writes.push(setDoc(atomRef, a));
+    }
+
+    await Promise.all(writes);
+    console.log(`Seeding complete: ${sampleSessions.length} sessions and ${sampleAtoms.length} atoms written.`);
+  } catch (err) {
+    console.error('Seeding error:', err);
   }
-];
-
-const writes = [];
-
-// Write sessions (use doc IDs that your app expects; here we use session_<id>)
-for (const s of sampleSessions) {
-  const docRef = doc(db, 'master_sessions', `session_${s.session_id}`);
-  writes.push(setDoc(docRef, s));
-}
-
-// Write atoms collection using atom_id as the document ID and write the full object
-for (const a of sampleAtoms) {
-  const atomDocId = a.atom_id; // keep consistent with your field name
-  const atomRef = doc(db, 'atoms', atomDocId);
-  writes.push(setDoc(atomRef, a));
-}
-
-await Promise.all(writes);
-console.log(`Seeding complete: ${sampleSessions.length} sessions and ${sampleAtoms.length} atoms written.`);
-    
+})();   
 // --- COMPONENT: RETRIEVAL OVERLAY ---
 const RetrievalScreen = ({ questions, onClose }) => {
   const [idx, setIdx] = useState(0);
