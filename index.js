@@ -18,6 +18,71 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// add setDoc if not already present
+import { 
+  getFirestore, collection, getDocs, doc, getDoc, 
+  query, orderBy, updateDoc, setDoc 
+} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+// --- Lightweight client-side seeder (paste AFTER `const db = getFirestore(app);`) ---
+(async function seedIfEmpty() {
+  if (window.__seeded) return; // prevent double-run in dev
+  window.__seeded = true;
+
+  try {
+    // If there are already master_sessions, skip seeding to avoid duplicates
+    const existing = await getDocs(collection(db, 'master_sessions'));
+    if (existing.size > 0) {
+      console.log('Seed skipped: master_sessions not empty');
+      return;
+    }
+
+    // Adjust these sample documents to match your app schema as needed
+    const sampleSessions = [
+       { session_id: 1, strand: "place_value", title: "The 10 Symbols", li: "Recognise 0-9 build all numbers.", atoms: ["PV-1.1"], 
+  conceptual_atoms: [
+      {"atom": "There are only 10 digits in our system: 0, 1, 2, 3, 4, 5, 6, 7, 8, 9.", "type": "Fact"},
+      {"atom": "Identify each digit by its name and symbol.", "type": "Categorical"},
+      {"atom": "Recognise that any multi-digit number is built from these 10 symbols.", "type": "Fact"}
+    ]}
+    ];
+
+    const sampleAtoms = [
+      {
+    atom_id: "PV-1.1",
+    strand: "place_value",
+    title: "The 10 Symbols",
+    description: "Recognizing that 0-9 are the building blocks of all numbers.",
+    misconceptions: ["Confusing digit value with position"],
+    retrieval_pool: [
+      { q: "How many single digits exist in our number system?", a: "10 (0 through 9)" },
+      { q: "What is the largest single-digit symbol?", a: "9" },
+      { q: "True or False: The number 11 is a single digit symbol.", a: "False (it is two symbols)" },
+      { q: "Which digit represents 'none' or 'empty'?", a: "0" },
+      { q: "Can we build any number using only 0, 1, 2, 3, 4, 5, 6, 7, 8, and 9?", a: "Yes" }
+    ];
+
+    const writes = [];
+
+    // Write sessions (use doc IDs that your app expects; here we use session_<id>)
+    for (const s of sampleSessions) {
+      const docRef = doc(db, 'master_sessions', `session_${s.session_id}`);
+      writes.push(setDoc(docRef, s));
+    }
+
+    // Write atoms collection
+    for (const a of sampleAtoms) {
+      const atomRef = doc(db, 'atoms', a.id);
+      writes.push(setDoc(atomRef, { q: a.q, a: a.a }));
+    }
+
+    await Promise.all(writes);
+    console.log(`Seeding complete: ${sampleSessions.length} sessions and ${sampleAtoms.length} atoms written.`);
+  } catch (err) {
+    console.error('Seeding error:', err);
+  }
+})();
+
 // --- COMPONENT: RETRIEVAL OVERLAY ---
 const RetrievalScreen = ({ questions, onClose }) => {
   const [idx, setIdx] = useState(0);
