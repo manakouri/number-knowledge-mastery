@@ -7,12 +7,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyB5L2VJahLNK76xWxC7MjsGbbcf70HjARs",
-  authDomain: "number-knowledge-71dba.firebaseapp.com",
-  projectId: "number-knowledge-71dba",
-  storageBucket: "number-knowledge-71dba.firebasestorage.app",
-  messagingSenderId: "931772776390",
-  appId: "1:931772776390:web:e6fddd88629bcf1d803cc7"
+    apiKey: "AIzaSyDshxktyzOe7ieSaOoZJiZ2HIRZC69afho",
+    authDomain: "maths-knowledge-1480d.firebaseapp.com",
+    projectId: "maths-knowledge-1480d",
+    storageBucket: "maths-knowledge-1480d.firebasestorage.app",
+    messagingSenderId: "768472041798",
+    appId: "1:768472041798:web:2b0e3628f9408a252d3d47",
 };
 
 const app = initializeApp(firebaseConfig);
