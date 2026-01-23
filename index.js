@@ -18,12 +18,6 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// add setDoc if not already present
-import { 
-  getFirestore, collection, getDocs, doc, getDoc, 
-  query, orderBy, updateDoc, setDoc 
-} from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
-
 // --- Lightweight client-side seeder (paste AFTER `const db = getFirestore(app);`) ---
 (async function seedIfEmpty() {
   if (window.__seeded) return; // prevent double-run in dev
