@@ -54,7 +54,8 @@ const db = getFirestore(app);
       { q: "True or False: The number 11 is a single digit symbol.", a: "False (it is two symbols)" },
       { q: "Which digit represents 'none' or 'empty'?", a: "0" },
       { q: "Can we build any number using only 0, 1, 2, 3, 4, 5, 6, 7, 8, and 9?", a: "Yes" }
-    ];
+    ]
+        };
 
     const writes = [];
 
