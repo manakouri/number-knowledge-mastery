@@ -41,8 +41,9 @@ const db = getFirestore(app);
     ]}
     ];
 
-    const sampleAtoms = [
-      {
+   // corrected sampleAtoms and write loop
+const sampleAtoms = [
+  {
     atom_id: "PV-1.1",
     strand: "place_value",
     title: "The 10 Symbols",
@@ -55,29 +56,27 @@ const db = getFirestore(app);
       { q: "Which digit represents 'none' or 'empty'?", a: "0" },
       { q: "Can we build any number using only 0, 1, 2, 3, 4, 5, 6, 7, 8, and 9?", a: "Yes" }
     ]
-        };
-
-    const writes = [];
-
-    // Write sessions (use doc IDs that your app expects; here we use session_<id>)
-    for (const s of sampleSessions) {
-      const docRef = doc(db, 'master_sessions', `session_${s.session_id}`);
-      writes.push(setDoc(docRef, s));
-    }
-
-    // Write atoms collection
-    for (const a of sampleAtoms) {
-      const atomRef = doc(db, 'atoms', a.id);
-      writes.push(setDoc(atomRef, { q: a.q, a: a.a }));
-    }
-
-    await Promise.all(writes);
-    console.log(`Seeding complete: ${sampleSessions.length} sessions and ${sampleAtoms.length} atoms written.`);
-  } catch (err) {
-    console.error('Seeding error:', err);
   }
-})();
+];
 
+const writes = [];
+
+// Write sessions (use doc IDs that your app expects; here we use session_<id>)
+for (const s of sampleSessions) {
+  const docRef = doc(db, 'master_sessions', `session_${s.session_id}`);
+  writes.push(setDoc(docRef, s));
+}
+
+// Write atoms collection using atom_id as the document ID and write the full object
+for (const a of sampleAtoms) {
+  const atomDocId = a.atom_id; // keep consistent with your field name
+  const atomRef = doc(db, 'atoms', atomDocId);
+  writes.push(setDoc(atomRef, a));
+}
+
+await Promise.all(writes);
+console.log(`Seeding complete: ${sampleSessions.length} sessions and ${sampleAtoms.length} atoms written.`);
+    
 // --- COMPONENT: RETRIEVAL OVERLAY ---
 const RetrievalScreen = ({ questions, onClose }) => {
   const [idx, setIdx] = useState(0);
